@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Complete Universal Calculus Master Sheet</title>
+    
+    <!-- KaTeX for high-performance math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false}
+            ]
+        });"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --hue-primary: 160;   
+            --hue-secondary: 190; 
+            
+            --neon-primary: hsl(var(--hue-primary), 100%, 50%);
+            --neon-secondary: hsl(var(--hue-secondary), 100%, 50%);
+            --neon-glow: hsla(var(--hue-primary), 100%, 50%, 0.35);
+
+            --bg-base: #030712;
+            --card-bg: rgba(9, 16, 31, 0.92);
+            --card-border: hsla(var(--hue-primary), 100%, 50%, 0.25);
+            --card-border-glow: hsla(var(--hue-primary), 100%, 50%, 0.6);
+            
+            --text-main: #f0fdf4;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+
+            --radius-xl: 24px;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        #matrixCanvas {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 0; pointer-events: none; opacity: 0.35;
+        }
+
+        .app-wrapper {
+            position: relative; z-index: 1; max-width: 1500px;
+            margin: 0 auto; padding: 2rem 2rem 6rem;
+        }
+
+        .nav-dock {
+            position: fixed; right: 2rem; top: 50%; transform: translateY(-50%);
+            z-index: 99; display: flex; flex-direction: column; gap: 0.4rem;
+            background: rgba(7, 13, 26, 0.85); border: 1px solid var(--card-border);
+            padding: 0.6rem 0.4rem; border-radius: 9999px; backdrop-filter: blur(20px);
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7), 0 0 15px var(--neon-glow);
+            max-height: 85vh; overflow-y: auto;
+        }
+
+        .nav-btn {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.03);
+            color: var(--text-muted); font-family: 'Fira Code', monospace;
+            font-weight: 700; font-size: 0.75rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.25s ease; position: relative; text-decoration: none;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: var(--neon-primary); color: #000; border-color: var(--neon-primary);
+            box-shadow: 0 0 15px var(--neon-primary); transform: scale(1.15);
+        }
+
+        .nav-btn::after {
+            content: attr(data-tooltip); position: absolute; right: 46px; top: 50%;
+            transform: translateY(-50%) translateX(10px); background: rgba(7, 13, 26, 0.95);
+            color: var(--neon-primary); border: 1px solid var(--card-border);
+            font-family: 'Fira Code', monospace; font-size: 0.7rem; padding: 0.3rem 0.6rem;
+            border-radius: var(--radius-md); white-space: nowrap; opacity: 0; pointer-events: none;
+            transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-btn:hover::after { opacity: 1; transform: translateY(-50%) translateX(0); }
+
+        header {
+            text-align: center; min-height: 35vh; display: flex;
+            flex-direction: column; justify-content: center; align-items: center; margin-bottom: 3rem;
+        }
+
+        .hacker-badge {
+            display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.5rem 1.4rem;
+            border-radius: 9999px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--neon-primary);
+            color: var(--neon-primary); font-family: 'Fira Code', monospace; font-size: 0.9rem;
+            letter-spacing: 0.12em; text-transform: uppercase; box-shadow: 0 0 20px var(--neon-glow);
+            margin-bottom: 1.5rem;
+        }
+
+        .pulse-dot {
+            width: 10px; height: 10px; background-color: var(--neon-primary);
+            border-radius: 50%; box-shadow: 0 0 10px var(--neon-primary); animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.7); }
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif; font-size: clamp(2.2rem, 5vw, 4rem);
+            font-weight: 900; letter-spacing: -0.01em;
+            background: linear-gradient(135deg, #ffffff 20%, var(--neon-primary) 60%, var(--neon-secondary) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 40px var(--neon-glow); margin-bottom: 1rem;
+        }
+
+        p.subtitle {
+            color: var(--text-muted); font-size: 1.1rem; max-width: 900px;
+            font-family: 'Fira Code', monospace; margin-bottom: 1rem;
+        }
+
+        .theme-selector-bar {
+            display: flex; align-items: center; justify-content: center; gap: 1rem;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            padding: 0.8rem 1.5rem; border-radius: 9999px; backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); margin-top: 1rem;
+        }
+
+        .theme-label {
+            font-family: 'Fira Code', monospace; font-size: 0.85rem;
+            color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase;
+        }
+
+        .theme-chips-wrapper { display: flex; gap: 0.6rem; align-items: center; }
+
+        .theme-chip {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2); cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .theme-chip:hover, .theme-chip.active {
+            transform: scale(1.2); box-shadow: 0 0 12px currentColor; border-color: #ffffff;
+        }
+
+        .toc-wrapper {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: var(--radius-xl); padding: 2.5rem; margin-bottom: 5rem;
+            backdrop-filter: blur(25px); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+        }
+
+        .toc-title {
+            font-family: 'Orbitron', sans-serif; font-size: 1.5rem;
+            color: var(--neon-primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem;
+        }
+
+        .toc-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;
+        }
+
+        .toc-card {
+            background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-lg); padding: 1rem 1.2rem; display: flex; align-items: center;
+            gap: 1rem; text-decoration: none; color: var(--text-main); font-family: 'Fira Code', monospace;
+            font-size: 0.85rem; transition: all 0.3s ease;
+        }
+
+        .toc-card:hover {
+            background: rgba(255, 255, 255, 0.05); border-color: var(--neon-primary);
+            transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 0 10px var(--neon-glow);
+        }
+
+        .toc-number {
+            width: 28px; height: 28px; border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-border);
+            color: var(--neon-primary); display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.8rem; flex-shrink: 0;
+        }
+
+        .section-container {
+            min-height: 85vh; display: flex; flex-direction: column;
+            justify-content: center; margin-bottom: 5rem; scroll-margin-top: 3rem;
+        }
+
+        .card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: var(--radius-xl); padding: 3rem; backdrop-filter: blur(25px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8); position: relative; overflow: hidden;
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .card:hover {
+            border-color: var(--card-border-glow);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.9), 0 0 30px var(--neon-glow);
+        }
+
+        .card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--neon-primary), var(--neon-secondary), transparent);
+        }
+
+        .card-header {
+            display: flex; align-items: center; gap: 1.25rem; margin-bottom: 2.5rem;
+            padding-bottom: 1.25rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .card-icon {
+            font-family: 'Fira Code', monospace; font-weight: 700; font-size: 1.2rem;
+            width: 46px; height: 46px; border-radius: var(--radius-md); display: flex;
+            align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border); color: var(--neon-primary); box-shadow: 0 0 15px var(--neon-glow);
+        }
+
+        .card-title {
+            font-family: 'Orbitron', sans-serif; font-size: 1.6rem; font-weight: 700;
+            color: var(--text-main); letter-spacing: 0.02em;
+        }
+
+        .table-responsive { width: 100%; overflow-x: auto; }
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; }
+
+        th {
+            background: rgba(0, 0, 0, 0.5); color: var(--neon-primary);
+            font-family: 'Fira Code', monospace; font-size: 0.95rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.1em; padding: 1.2rem 1.5rem;
+            border-bottom: 2px solid var(--card-border);
+        }
+
+        th:first-child { border-top-left-radius: var(--radius-md); }
+        th:last-child { border-top-right-radius: var(--radius-md); }
+
+        td {
+            padding: 1.2rem 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: transparent; font-size: 1.1rem;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+        .single-column-list { display: flex; flex-direction: column; gap: 1.25rem; width: 100%; }
+
+        .formula-card-wide {
+            background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-lg); padding: 1.6rem 2.2rem; width: 100%;
+            display: flex; align-items: center; justify-content: center; text-align: center;
+            font-size: 1.2rem; transition: all 0.3s ease;
+        }
+
+        .formula-card-wide:hover {
+            border-color: var(--neon-secondary); background: rgba(255, 255, 255, 0.03);
+            transform: translateX(6px); box-shadow: -5px 5px 20px rgba(0, 0, 0, 0.6), 0 0 15px var(--neon-glow);
+        }
+
+        footer {
+            margin-top: 6rem; text-align: center; color: var(--text-dim);
+            font-family: 'Fira Code', monospace; font-size: 0.9rem;
+        }
+
+        footer span { color: var(--neon-primary); }
+
+        @media (max-width: 768px) {
+            .nav-dock { display: none; }
+            .card { padding: 1.75rem; }
+            .section-container { min-height: auto; }
+            .formula-card-wide { font-size: 1rem; padding: 1.2rem; }
+            .theme-selector-bar { flex-direction: column; gap: 0.5rem; padding: 0.8rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="matrixCanvas"></canvas>
+
+    <!-- Navigation Dock -->
+    <nav class="nav-dock">
+        <a href="#section-1" class="nav-btn" data-tooltip="01. Limits & Continuity">1</a>
+        <a href="#section-2" class="nav-btn" data-tooltip="02. Basic Rules">2</a>
+        <a href="#section-3" class="nav-btn" data-tooltip="03. Exp & Log">3</a>
+        <a href="#section-4" class="nav-btn" data-tooltip="04. Standard Trig">4</a>
+        <a href="#section-5" class="nav-btn" data-tooltip="05. Hyperbolic">5</a>
+        <a href="#section-6" class="nav-btn" data-tooltip="06. Inverse Trig">6</a>
+        <a href="#section-7" class="nav-btn" data-tooltip="07. Inverse Hyperbolic">7</a>
+        <a href="#section-8" class="nav-btn" data-tooltip="08. Trig Powers/Products">8</a>
+        <a href="#section-9" class="nav-btn" data-tooltip="09. Reduction Formulas">9</a>
+        <a href="#section-10" class="nav-btn" data-tooltip="10. Mixed Frequencies">10</a>
+        <a href="#section-11" class="nav-btn" data-tooltip="11. Algebraic / Inverse Yields">11</a>
+        <a href="#section-12" class="nav-btn" data-tooltip="12. Substitutions & Euler">12</a>
+        <a href="#section-13" class="nav-btn" data-tooltip="13. Advanced Integration">13</a>
+        <a href="#section-14" class="nav-btn" data-tooltip="14. Series & Sequences">14</a>
+        <a href="#section-15" class="nav-btn" data-tooltip="15. Multivariable & Vector">15</a>
+    </nav>
+
+    <!-- App Wrapper -->
+    <div class="app-wrapper">
+        
+        <header>
+            <div class="hacker-badge">
+                <div class="pulse-dot"></div>
+                SYSTEM://UNIVERSAL_CALCULUS_CORE_v5.0
+            </div>
+            <h1>COMPLETE UNIVERSAL CALCULUS MASTER SHEET</h1>
+            <p class="subtitle">[ Limits • Derivatives • Integrals • Series • Multivariable Vector Calculus ]</p>
+
+            <div class="theme-selector-bar">
+                <span class="theme-label">Theme Accent:</span>
+                <div class="theme-chips-wrapper">
+                    <div class="theme-chip active" style="background: #00ffaa; color: #00ffaa;" data-hue="160" title="Matrix Green"></div>
+                    <div class="theme-chip" style="background: #00f0ff; color: #00f0ff;" data-hue="190" title="Cyber Cyan"></div>
+                    <div class="theme-chip" style="background: #0077ff; color: #0077ff;" data-hue="215" title="Electric Blue"></div>
+                    <div class="theme-chip" style="background: #a800ff; color: #a800ff;" data-hue="275" title="Neon Purple"></div>
+                    <div class="theme-chip" style="background: #ff00ea; color: #ff00ea;" data-hue="305" title="Neon Pink"></div>
+                    <div class="theme-chip" style="background: #ff0044; color: #ff0044;" data-hue="345" title="Crimson Red"></div>
+                    <div class="theme-chip" style="background: #ff6600; color: #ff6600;" data-hue="24" title="Neon Orange"></div>
+                    <div class="theme-chip" style="background: #ffea00; color: #ffea00;" data-hue="55" title="Neon Yellow"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Table of Contents -->
+        <div class="toc-wrapper">
+            <div class="toc-title">
+                <span>📑</span> TABLE OF CONTENTS
+            </div>
+            <div class="toc-grid">
+                <a href="#section-1" class="toc-card"><span class="toc-number">01</span> Limits, Continuity & L'Hôpital's Rule</a>
+                <a href="#section-2" class="toc-card"><span class="toc-number">02</span> Basic Derivatives & Power/Algebraic Rules</a>
+                <a href="#section-3" class="toc-card"><span class="toc-number">03</span> Exponential & Logarithmic Functions</a>
+                <a href="#section-4" class="toc-card"><span class="toc-number">04</span> Standard Trigonometric Functions</a>
+                <a href="#section-5" class="toc-card"><span class="toc-number">05</span> Hyperbolic Trigonometric Functions</a>
+                <a href="#section-6" class="toc-card"><span class="toc-number">06</span> Inverse Trigonometric Functions</a>
+                <a href="#section-7" class="toc-card"><span class="toc-number">07</span> Inverse Hyperbolic Functions</a>
+                <a href="#section-8" class="toc-card"><span class="toc-number">08</span> Trigonometric Powers & Products</a>
+                <a href="#section-9" class="toc-card"><span class="toc-number">09</span> General Reduction Formulas</a>
+                <a href="#section-10" class="toc-card"><span class="toc-number">10</span> Mixed Frequencies & Exponentials</a>
+                <a href="#section-11" class="toc-card"><span class="toc-number">11</span> Algebraic Integrals Yielding Inverse/Hyperbolics</a>
+                <a href="#section-12" class="toc-card"><span class="toc-number">12</span> Substitutions & Euler Complex Identities</a>
+                <a href="#section-13" class="toc-card"><span class="toc-number">13</span> Advanced Integration Techniques</a>
+                <a href="#section-14" class="toc-card"><span class="toc-number">14</span> Sequences, Series & Taylor Expansions</a>
+                <a href="#section-15" class="toc-card"><span class="toc-number">15</span> Multivariable & Vector Calculus Theorems</a>
+            </div>
+        </div>
+
+        <!-- SECTION 1 -->
+        <div class="section-container" id="section-1">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">01</div>
+                    <h2 class="card-title">Limits, Continuity & L'Hôpital's Rule</h2>
+                </div>
+                <div class="single-column-list">
+                    <div class="formula-card-wide">$$\lim_{x \to 0} \frac{\sin(x)}{x} = 1$$</div>
+                    <div class="formula-card-wide">$$\lim_{x \to 0} \frac{1 - \cos(x)}{x} = 0$$</div>
+                    <div class="formula-card-wide">$$\lim_{x \to \infty} \left(1 + \frac{1}{x}\right)^x = e = \lim_{x \to 0} (1 + x)^{1/x}$$</div>
+                    <div class="formula-card-wide">$$\text{If } \lim_{x \to c} \frac{f(x)}{g(x)} = \frac{0}{0} \text{ or } \frac{\pm\infty}{\pm\infty}, \text{ then } \lim_{x \to c} \frac{f(x)}{g(x)} = \lim_{x \to c} \frac{f'(x)}{g'(x)} \quad \text{(L'Hôpital's Rule)}$$</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2 -->
+        <div class="section-container" id="section-2">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">02</div>
+                    <h2 class="card-title">Basic Derivatives & Power/Algebraic Rules</h2>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Function $f(x)$</th>
+                                <th>Derivative $\frac{d}{dx}[f(x)]$</th>
+                                <th>Indefinite Integral $\int f(x) \, dx$</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>$c$ (constant)</td><td>$0$</td><td>$cx + C$</td></tr>
+                            <tr><td>$x^n \quad (n \neq -1)$</td><td>$n x^{n-1}$</td><td>$\frac{x^{n+1}}{n+1} + C$</td></tr>
+                            <tr><td>$\frac{1}{x} = x^{-1}$</td><td>$-\frac{1}{x^2}$</td><td>$\ln\lvert x\rvert + C$</td></tr>
+                            <tr><td>$\sqrt{x} = x^{1/2}$</td><td>$\frac{1}{2\sqrt{x}}$</td><td>$\frac{2}{3}x^{3/2} + C$</td></tr>
+                            <tr><td>$[f(x) \pm g(x)]$</td><td>$f'(x) \pm g'(x)$</td><td>$\int f(x)dx \pm \int g(x)dx$</td></tr>
+                            <tr><td>$f(x)g(x) \text{ (Product)}$</td><td>$f'(x)g(x) + f(x)g'(x)$</td><td>—</td></tr>
+                            <tr><td>$\frac{f(x)}{g(x)} \text{ (Quotient)}$</td><td>$\frac{f'(x)g(x) - f(x)g'(x)}{[g(x)]^2}$</td><td>—</td></tr>
+                            <tr><td>$f(g(x)) \text{ (Chain)}$</td><td>$f'(g(x)) \cdot g'(x)$</td><td>—</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3 -->
+        <div class="section-container" id="section-3">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">03</div>
+                    <h2 class="card-title">Exponential & Logarithmic Functions</h2>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Function $f(x)$</th>
+                                <th>Derivative $\frac{d}{dx}[f(x)]$</th>
+                                <th>Indefinite Integral $\int f(x) \, dx$</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>$e^x$</td><td>$e^x$</td><td>$e^x + C$</td></tr>
+                            <tr><td>$a^x$</td><td>$a^x \ln(a)$</td><td>$\frac{a^x}{\ln(a)} + C$</td></tr>
+                            <tr><td>$\ln(x)$</td><td>$\frac{1}{x}$</td><td>$x\ln(x) - x + C$</td></tr>
+                            <tr><td>$\log_a(x)$</td><td>$\frac{1}{x \ln(a)}$</td><td>$x\log_a(x) - \frac{x}{\ln(a)} + C$</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 4 -->
+        <div class="section-container" id="section-4">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">04</div>
+                    <h2 class="card-title">Standard Trigonometric Functions</h2>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Function $f(x)$</th>
+                                <th>Derivative $\frac{d}{dx}[f(x)]$</th>
+                                <th>Indefinite Integral $\int f(x) \, dx$</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>$\sin(x)$</td><td>$\cos(x)$</td><td>$-\cos(x) + C$</td></tr>
+                            <tr><td>$\cos(x)$</td><td>$-\sin(x)$</td><td>$\sin(x) + C$</td></tr>
+                            <tr><td>$\tan(x)$</td><td>$\sec^2(x)$</td><td>$\ln\lvert\sec(x)\rvert + C$</td></tr>
+                            <tr><td>$\csc(x)$</td><td>$-\csc(x)\cot(x)$</td><td>$-\ln\lvert\csc(x) + \cot(x)\rvert + C$</td></tr>
+                            <tr><td>$\sec(x)$</td><td>$\sec(x)\tan(x)$</td><td>$\ln\lvert\sec(x) + \tan(x)\rvert + C$</td></tr>
+                            <tr><td>$\cot(x)$</td><td>$-\csc^2(x)$</td><td>$\ln\lvert\sin(x)\rvert + C$</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 5 -->
+        <div class="section-container" id="section-5">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">05</div>
+                    <h2 class="card-title">Hyperbolic Trigonometric Functions</h2>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Function $f(x)$</th>
+                                <th>Derivative $\frac{d}{dx}[f(x)]$</th>
+                                <th>Indefinite Integral $\int f(x) \, dx$</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>$\sinh(x)$</td><td>$\cosh(x)$</td><td>$\cosh(x) + C$</td></tr>
+                            <tr><td>$\cosh(x)$</td><td>$\sinh(x)$</td><td>$\sinh(x) + C$</td></tr>
+                            <tr><td>$\tanh(x)$</td><td>$\text{sech}^2(x)$</td><td>$\ln(\cosh(x)) + C$</td></tr>
+                            <tr><td>$\text{csch}(x)$</td><td>$-\text{csch}(x)\coth(x)$</td><td>$\ln\lvert\tanh\left(\frac{x}{2}\right)\rvert + C$</td></tr>
+                            <tr><td>$\text{sech}(x)$</td><td>$-\text{sech}(x)\tanh(x)$</td><td>$\arctan(\sinh(x)) + C$</td></tr>
+                            <tr><td>$\coth(x)$</td><td>$-\text{csch}^2(x)$</td><td>$\ln\lvert\sinh(x)\rvert + C$</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 6 -->
+        <div class="section-container" id="section-6">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">06</div>
+                    <h2 class="card-title">Inverse Trigonometric Functions</h2>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Function $f(x)$</th>
+                                <th>Derivative $\frac{d}{dx}[f(x)]$</th>
+                                <th>Indefinite Integral $\int f(x) \, dx$</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>$\arcsin(x)$</td><td>$\frac{1}{\sqrt{1 - x^2}}$</td><td>$x \arcsin(x) + \sqrt{1 - x^2} + C$</td></tr>
+                            <tr><td>$\arccos(x)$</td><td>$-\frac{1}{\sqrt{1 - x^2}}$</td><td>$x \arccos(x) - \sqrt{1 - x^2} + C$</td></tr>
+                            <tr><td>$\arctan(x)$</td><td>$\frac{1}{1 + x^2}$</td><td>$x \arctan(x) - \frac{1}{2} \ln(1 + x^2) + C$</td></tr>
+                            <tr><td>$\text{arccsc}(x)$</td><td>$-\frac{1}{\lvert x\rvert \sqrt{x^2 - 1}}$</td><td>$x \text{arccsc}(x) + \ln\lvert x + \sqrt{x^2 - 1}\rvert + C$</td></tr>
+                            <tr><td>$\text{arcsec}(x)$</td><td>$\frac{1}{\lvert x\rvert \sqrt{x^2 - 1}}$</td><td>$x \text{arcsec}(x) - \ln\lvert x + \sqrt{x^2 - 1}\rvert + C$</td></tr>
+                            <tr><td>$\text{arccot}(x)$</td><td>$-\frac{1}{1 + x^2}$</td><td>$x \text{arccot}(x) + \frac{1}{2} \ln(1 + x^2) + C$</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 7 -->
+        <div class="section-container" id="section-7">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">07</div>
+                    <h2 class="card-title">Inverse Hyperbolic Functions</h2>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Function $f(x)$</th>
+                                <th>Derivative $\frac{d}{dx}[f(x)]$</th>
+                                <th>Indefinite Integral $\int f(x) \, dx$</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>$\text{arsinh}(x)$</td><td>$\frac{1}{\sqrt{x^2 + 1}}$</td><td>$x \text{arsinh}(x) - \sqrt{x^2 + 1} + C$</td></tr>
+                            <tr><td>$\text{arcosh}(x)$</td><td>$\frac{1}{\sqrt{x^2 - 1}}$</td><td>$x \text{arcosh}(x) - \sqrt{x^2 - 1} + C$</td></tr>
+                            <tr><td>$\text{artanh}(x)$</td><td>$\frac{1}{1 - x^2} \quad (\lvert x\rvert < 1)$</td><td>$x \text{artanh}(x) + \frac{1}{2}\ln(1 - x^2) + C$</td></tr>
+                            <tr><td>$\text{arcsch}(x)$</td><td>$-\frac{1}{\lvert x\rvert \sqrt{1 + x^2}}$</td><td>$x \text{arcsch}(x) + \text{arsinh}\lvert x\rvert^{-1} + C$</td></tr>
+                            <tr><td>$\text{arsech}(x)$</td><td>$-\frac{1}{x \sqrt{1 - x^2}}$</td><td>$x \text{arsech}(x) - \arcsin(x) + C$</td></tr>
+                            <tr><td>$\text{arcoth}(x)$</td><td>$\frac{1}{1 - x^2} \quad (\lvert x\rvert > 1)$</td><td>$x \text{arcoth}(x) + \frac{1}{2}\ln(x^2 - 1) + C$</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 8 -->
+        <div class="section-container" id="section-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">08</div>
+                    <h2 class="card-title">Trigonometric Powers & Product Integrals</h2>
+                </div>
+                <div class="single-column-list">
+                    <div class="formula-card-wide">$$\int \sin^2(x) \, dx = \frac{x}{2} - \frac{\sin(2x)}{4} + C$$</div>
+                    <div class="formula-card-wide">$$\int \cos^2(x) \, dx = \frac{x}{2} + \frac{\sin(2x)}{4} + C$$</div>
+                    <div class="formula-card-wide">$$\int \tan^2(x) \, dx = \tan(x) - x + C$$</div>
+                    <div class="formula-card-wide">$$\int \sec^2(x) \, dx = \tan(x) + C$$</div>
+                    <div class="formula-card-wide">$$\int \csc^2(x) \, dx = -\cot(x) + C$$</div>
+                    <div class="formula-card-wide">$$\int \cot^2(x) \, dx = -\cot(x) - x + C$$</div>
+                    <div class="formula-card-wide">$$\int \sin^3(x) \, dx = -\frac{3\cos(x)}{4} + \frac{\cos(3x)}{12} + C$$</div>
+                    <div class="formula-card-wide">$$\int \cos^3(x) \, dx = \frac{3\sin(x)}{4} + \frac{\sin(3x)}{12} + C$$</div>
+                    <div class="formula-card-wide">$$\int \sec^3(x) \, dx = \frac{1}{2}\sec(x)\tan(x) + \frac{1}{2}\ln\lvert\sec(x)+\tan(x)\rvert + C$$</div>
+                    <div class="formula-card-wide">$$\int \csc^3(x) \, dx = -\frac{1}{2}\csc(x)\cot(x) - \frac{1}{2}\ln\lvert\csc(x)+\cot(x)\rvert + C$$</div>
+                    <div class="formula-card-wide">$$\int \sec(x)\tan(x) \, dx = \sec(x) + C$$</div>
+                    <div class="formula-card-wide">$$\int \csc(x)\cot(x) \, dx = -\csc(x) + C$$</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 9 -->
+        <div class="section-container" id="section-9">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">09</div>
+                    <h2 class="card-title">General Reduction Formulas ($n \ge 2$)</h2>
+                </div>
+                <div class="single-column-list">
+                    <div class="formula-card-wide">$$\int \sin^n(x) \, dx = -\frac{\sin^{n-1}(x)\cos(x)}{n} + \frac{n-1}{n}\int \sin^{n-2}(x) \, dx$$</div>
+                    <div class="formula-card-wide">$$\int \cos^n(x) \, dx = \frac{\cos^{n-1}(x)\sin(x)}{n} + \frac{n-1}{n}\int \cos^{n-2}(x) \, dx$$</div>
+                    <div class="formula-card-wide">$$\int \tan^n(x) \, dx = \frac{\tan^{n-1}(x)}{n-1} - \int \tan^{n-2}(x) \, dx$$</div>
+                    <div class="formula-card-wide">$$\int \sec^n(x) \, dx = \frac{\sec^{n-2}(x)\tan(x)}{n-1} + \frac{n-2}{n-1}\int \sec^{n-2}(x) \, dx$$</div>
+                    <div class="formula-card-wide">$$\int \csc^n(x) \, dx = -\frac{\csc^{n-2}(x)\cot(x)}{n-1} + \frac{n-2}{n-1}\int \csc^{n-2}(x) \, dx$$</div>
+                    <div class="formula-card-wide">$$\int \cot^n(x) \, dx = -\frac{\cot^{n-1}(x)}{n-1} - \int \cot^{n-2}(x) \, dx$$</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 10 -->
+        <div class="section-container" id="section-10">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">10</div>
+                    <h2 class="card-title">Mixed Frequencies & Exponential-Trig Products</h2>
+                </div>
+                <div class="single-column-list">
+                    <div class="formula-card-wide">$$\int \sin(ax)\cos(bx) \, dx = -\frac{\cos((a-b)x)}{2(a-b)} - \frac{\cos((a+b)x)}{2(a+b)} + C$$</div>
+                    <div class="formula-card-wide">$$\int \sin(ax)\sin(bx) \, dx = \frac{\sin((a-b)x)}{2(a-b)} - \frac{\sin((a+b)x)}{2(a+b)} + C$$</div>
+                    <div class="formula-card-wide">$$\int \cos(ax)\cos(bx) \, dx = \frac{\sin((a-b)x)}{2(a-b)} + \frac{\sin((a+b)x)}{2(a+b)} + C$$</div>
+                    <div class="formula-card-wide">$$\int e^{ax} \sin(bx) \, dx = \frac{e^{ax}(a\sin(bx) - b\cos(bx))}{a^2 + b^2} + C$$</div>
+                    <div class="formula-card-wide">$$\int e^{ax} \cos(bx) \, dx = \frac{e^{ax}(a\cos(bx) + b\sin(bx))}{a^2 + b^2} + C$$</div>
+                    <div class="formula-card-wide">$$\int x \sin(ax) \, dx = \frac{\sin(ax)}{a^2} - \frac{x\cos(ax)}{a} + C$$</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 11 -->
+        <div class="section-container" id="section-11">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">11</div>
+                    <h2 class="card-title">Algebraic Integrals Yielding Inverse Trig & Hyperbolics</h2>
+                </div>
+                <div class="single-column-list">
+                    <div class="formula-card-wide">$$\int \frac{dx}{\sqrt{a^2 - x^2}} = \arcsin\left(\frac{x}{a}\right) + C$$</div>
+                    <div class="formula-card-wide">$$\int \frac{dx}{a^2 + x^2} = \frac{1}{a} \arctan\left(\frac{x}{a}\right) + C$$</div>
+                    <div class="formula-card-wide">$$\int \frac{dx}{x\sqrt{x^2 - a^2}} = \frac{1}{a} \text{arcsec}\left(\frac{\lvert x\rvert}{a}\right) + C$$</div>
+                    <div class="formula-card-wide">$$\int \frac{dx}{\sqrt{x^2 + a^2}} = \text{arsinh}\left(\frac{x}{a}\right) + C = \ln\left(x + \sqrt{x^2 + a^2}\right) + C$$</div>
+                    <div class="formula-card-wide">$$\int \frac{dx}{\sqrt{x^2 - a^2}} = \text{arcosh}\left(\frac{x}{a}\right) + C = \ln\left\lvert x + \sqrt{x^2 - a^2}\right\rvert + C$$</div>
+                    <div class="formula-card-wide">$$\int \frac{dx}{a^2 - x^2} = \frac{1}{a} \text{artanh}\left(\frac{x}{a}\right) + C = \frac{1}{2a}\ln\left\lvert\frac{a+x}{a-x}\right\rvert + C$$</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 12 -->
+        <div class="section-container" id="section-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">12</div>
+                    <h2 class="card-title">Substitutions & Euler Complex Identities</h2>
+                </div>
+                <div class="single-column-list">
+                    <div class="formula-card-wide">$$\text{Let } t = \tan\left(\frac{x}{2}\right) \implies dx = \frac{2}{1+t^2} dt \quad \text{(Weierstrass Substitution)}$$</div>
+                    <div class="formula-card-wide">$$\sin(x) = \frac{2t}{1+t^2}, \quad \cos(x) = \frac{1-t^2}{1+t^2}, \quad \tan(x) = \frac{2t}{1-t^2}$$</div>
+                    <div class="formula-card-wide">$$e^{ix} = \cos(x) + i\sin(x) \quad \text{(Euler's Identity)}$$</div>
+                    <div class="formula-card-wide">$$\sin(x) = \frac{e^{ix} - e^{-ix}}{2i}, \quad \cos(x) = \frac{e^{ix} + e^{-ix}}{2}$$</div>
+                    <div class="formula-card-wide">$$\sinh(x) = \frac{e^x - e^{-x}}{2}, \quad \cosh(x) = \frac{e^x + e^{-x}}{2}$$</div>
+                    <div class="formula-card-wide">$$\int_{0}^{\pi/2} \sin^n(x) dx = \int_{0}^{\pi/2} \cos^n(x) dx \quad \text{(Wallis' Integrals)}$$</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 13 -->
+        <div class="section-container" id="section-13">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">13</div>
+                    <h2 class="card-title">Advanced Integration Techniques</h2>
+                </div>
+                <div class="single-column-list">
+                    <div class="formula-card-wide">$$\int u \, dv = uv - \int v \, du \quad \text{(Integration by Parts)}$$</div>
+                    <div class="formula-card-wide">\text{Trig Sub Map: } \sqrt{a^2 - x^2} \implies x = a\sin(\theta) \;\;|\;\; \sqrt{a^2 + x^2} \implies x = a\tan(\theta) \;\;|\;\; \sqrt{x^2 - a^2} \implies x = a\sec(\theta)</div>
+                    <div class="formula-card-wide">\text{Partial Fractions: } \frac{P(x)}{(x-a)(x-b)} = \frac{A}{x-a} + \frac{B}{x-b}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 14 -->
+        <div class="section-container" id="section-14">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">14</div>
+                    <h2 class="card-title">Sequences, Series & Taylor Expansions</h2>
+                </div>
+                <div class="single-column-list">
+                    <div class="formula-card-wide">$$\sum_{n=0}^{\infty} ar^n = \frac{a}{1-r} \quad (\lvert r\rvert < 1) \quad \text{(Geometric Series)}$$</div>
+                    <div class="formula-card-wide">$$e^x = \sum_{n=0}^{\infty} \frac{x^n}{n!} = 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \dots$$</div>
+                    <div class="formula-card-wide">$$\sin(x) = \sum_{n=0}^{\infty} \frac{(-1)^n x^{2n+1}}{(2n+1)!} = x - \frac{x^3}{3!} + \frac{x^5}{5!} - \dots$$</div>
+                    <div class="formula-card-wide">$$\cos(x) = \sum_{n=0}^{\infty} \frac{(-1)^n x^{2n}}{(2n)!} = 1 - \frac{x^2}{2!} + \frac{x^4}{4!} - \dots$$</div>
+                    <div class="formula-card-wide">$$\frac{1}{1-x} = \sum_{n=0}^{\infty} x^n = 1 + x + x^2 + x^3 + \dots \quad (\lvert x\rvert < 1)$$</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 15 -->
+        <div class="section-container" id="section-15">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">15</div>
+                    <h2 class="card-title">Multivariable & Vector Calculus Theorems</h2>
+                </div>
+                <div class="single-column-list">
+                    <div class="formula-card-wide">$$\nabla f = \left\langle \frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}, \frac{\partial f}{\partial z} \right\rangle \quad \text{(Gradient)}$$</div>
+                    <div class="formula-card-wide">$$\nabla \cdot \mathbf{F} = \frac{\partial P}{\partial x} + \frac{\partial Q}{\partial y} + \frac{\partial R}{\partial z} \quad \text{(Divergence)}$$</div>
+                    <div class="formula-card-wide">$$\nabla \times \mathbf{F} = \left(\frac{\partial R}{\partial y} - \frac{\partial Q}{\partial z}\right)\mathbf{i} + \left(\frac{\partial P}{\partial z} - \frac{\partial R}{\partial x}\right)\mathbf{j} + \left(\frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y}\right)\mathbf{k} \quad \text{(Curl)}$$</div>
+                    <div class="formula-card-wide">$$\oint_C (L \, dx + M \, dy) = \iint_D \left(\frac{\partial M}{\partial x} - \frac{\partial L}{\partial y}\right) dA \quad \text{(Green's Theorem)}$$</div>
+                    <div class="formula-card-wide">$$\iint_S \mathbf{F} \cdot d\mathbf{S} = \iiint_V (\nabla \cdot \mathbf{F}) \, dV \quad \text{(Divergence / Gauss's Theorem)}$$</div>
+                    <div class="formula-card-wide">$$\oint_C \mathbf{F} \cdot d\mathbf{r} = \iint_S (\nabla \times \mathbf{F}) \cdot d\mathbf{S} \quad \text{(Stokes' Theorem)}$$</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            SYNTHESIZED CALCULUS SYSTEM • <span>UNIVERSAL EDITION ACTIVE</span> • COMPLETE CORE • Taga Sac nag ubra ah skl
+        </footer>
+
+    </div>
+
+    <script>
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const chars = '0123456789∫∂sin(x)cos(x)tan(x)sec(x)arcsin√πθ∞λ∇Δαβγcsc(x)dxdy';
+        const fontSize = 15;
+        let columns = Math.floor(canvas.width / fontSize);
+        let drops = Array(columns).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(3, 7, 18, 0.08)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const computedStyle = getComputedStyle(document.documentElement);
+            const primaryHue = computedStyle.getPropertyValue('--hue-primary').trim() || 160;
+
+            ctx.font = fontSize + "px 'Fira Code', monospace";
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                
+                if (Math.random() > 0.85) {
+                    ctx.fillStyle = `hsl(${primaryHue}, 100%, 70%)`;
+                } else {
+                    ctx.fillStyle = `hsla(${primaryHue}, 100%, 50%, 0.5)`;
+                }
+
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.985) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 35);
+
+        const themeChips = document.querySelectorAll('.theme-chip');
+
+        themeChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                themeChips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+
+                const hue = chip.getAttribute('data-hue');
+                document.documentElement.style.setProperty('--hue-primary', hue);
+                document.documentElement.style.setProperty('--hue-secondary', (parseInt(hue) + 30) % 360);
+            });
+        });
+
+        const sections = document.querySelectorAll('.section-container');
+        const navBtns = document.querySelectorAll('.nav-dock .nav-btn');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 250) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navBtns.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('href') === `#${current}`) {
+                    btn.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
